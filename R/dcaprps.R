@@ -1,0 +1,73 @@
+#' Calculate Circle-to-Regular-Polygon Deformity
+#'
+#' @title Deformation of Circle's Area and Perimeter to Regular Polygon Side
+#'
+#' @description
+#' Calculates the geometric inconsistency (deformity) that arises when transforming
+#' a circle into a regular polygon. This deformity measures the difference between
+#' two different methods of determining the polygon's side length: one based on
+#' conserving the circle's area, and another based on conserving the circle's perimeter.
+#' Since both area and perimeter cannot be simultaneously preserved during this
+#' transformation, the resulting discrepancy quantifies the geometric "cost" of the
+#' shape transformation.
+#'
+#' @param n Integer vector of polygon sides (must be >= 3). The number of sides
+#'   of the target regular polygon(s).
+#' @param r Numeric vector of circle radius/radii (must be positive). Default is 1.
+#'
+#' @return Numeric vector of deformity values, one for each combination of n and r.
+#'   Positive values indicate that the area-preserving side length is greater than
+#'   the perimeter-preserving side length.
+#'
+#' @details
+#' The function computes:
+#' \deqn{d_n = s_{area} - s_{perimeter}}
+#'
+#' Where:
+#' \itemize{
+#'   \item \eqn{s_{area} = 2r\sqrt{\frac{\pi \tan(\pi/n)}{n}}} (side length preserving area)
+#'   \item \eqn{s_{perimeter} = \frac{2\pi r}{n}} (side length preserving perimeter)
+#' }
+#'
+#' The deformity represents a fundamental geometric inconsistency: when transforming
+#' a circle (area = \eqn{\pi r^2}, perimeter = \eqn{2\pi r}) to a regular n-gon,
+#' different invariants (area vs. perimeter) suggest different target geometries.
+#'
+#' As n approaches infinity, the deformity approaches zero, reflecting that regular
+#' polygons approach circles in the limit.
+#'
+#' @examples
+#' # Basic usage
+#' dcaprps(3)  # Triangle deformity with unit circle
+#' dcaprps(4)  # Square deformity with unit circle
+#'
+#' # Multiple polygons
+#' dcaprps(3:8)  # Deformities for triangle through octagon
+#'
+#' # Different circle sizes
+#' dcaprps(4, r = 2)  # Square deformity with radius 2
+#' dcaprps(3, r = c(1, 2, 3))  # Multiple r values
+#'
+#' # Explore the relationship between n and deformity
+#' n_vals <- 3:20
+#' deformities <- dcaprps(n_vals)
+#' plot(n_vals, deformities, type = "b",
+#'      xlab = "Number of sides", ylab = "Deformity")
+#'
+#' @seealso
+#' For theoretical background, see research on geometric invariants, allometry,
+#' and isoperimetric inequalities.
+#'
+#' @export
+dcaprps <- function(n, r = 1) {
+  # Validate inputs
+  if (any(n < 3) || any(n != round(n))) {
+    stop("n must be integers >= 3")
+  }
+  if (any(r <= 0)) {
+    stop("r must be positive")
+  }
+
+  # Calculate deformity for each n
+  2 * r * (sqrt(pi * tan(pi/n) / n) - pi/n)
+}
