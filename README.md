@@ -72,21 +72,27 @@ n_vals <- 3:20
 side_deformity <- dcaprps(n_vals)
 area_deformity <- dcaprpa(n_vals)
 
+# Normalize the values to make them dimensionless for a fair comparison
+# Normalize area deformity by the circle's area (pi*r^2, with r=1)
+# Normalize side deformity by the circle's radius (r=1)
+norm_area_def <- area_deformity / pi
+norm_side_def <- side_deformity / 1
+
 # Plot the results
-plot(n_vals, area_deformity, type = "b", col = "red",
-     xlab = "Number of Polygon Sides (n)", ylab = "Deformity Value",
-     main = "Geometric Deformity: Circle to Regular Polygon")
-lines(n_vals, side_deformity, type = "b", col = "blue")
-legend("topright", c("Area Deformity", "Side Length Deformity"), 
+plot(n_vals, norm_area_def, type = "b", col = "red",
+     xlab = "Number of Polygon Sides (n)", ylab = "Normalized Deformity",
+     main = "Normalized Geometric Deformity: Circle to Polygon")
+lines(n_vals, norm_side_def, type = "b", col = "blue")
+legend("topright", c("Relative Area Deformity", "Relative Side Length Deformity"), 
        col = c("red", "blue"), lty = 1, pch = 1)
 ```
 
 <div class="figure">
 
-<img src="man/figures/README-example-2d-plot-1.png" alt="Comparison of Area and Side Length Deformity as the number of polygon sides increases." width="100%" />
+<img src="man/figures/README-example-2d-plot-1.png" alt="Comparison of normalized Area and Side Length Deformity as the number of polygon sides increases." width="100%" />
 <p class="caption">
-Comparison of Area and Side Length Deformity as the number of polygon
-sides increases.
+Comparison of normalized Area and Side Length Deformity as the number of
+polygon sides increases.
 </p>
 
 </div>
