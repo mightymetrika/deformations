@@ -101,7 +101,8 @@ polygon sides increases.
 
 The package provides a similar set of functions for exploring the
 transformation of a sphere into one of the five Platonic solids
-(identified by their number of faces: 4, 6, 8, 12, or 20).
+(identified by their number of faces: 4, 6, 8, 12, or 20). The plot
+below shows the normalized deformities for a fair comparison.
 
 ``` r
 # Define the five Platonic solids
@@ -112,22 +113,30 @@ edge_def <- dsvsarps(solids)
 area_def <- dsvsarpa(solids)
 vol_def <- dsvsarpv(solids)
 
+# Normalize the values to make them dimensionless (for a unit sphere, r=1)
+# Normalize volume by sphere's volume (4/3 * pi * r^3)
+# Normalize surface area by sphere's surface area (4 * pi * r^2)
+# Normalize edge length by sphere's radius (r)
+norm_vol_def <- vol_def / ((4/3) * pi)
+norm_area_def_3d <- area_def / (4 * pi)
+norm_edge_def <- edge_def / 1
+
 # Plot the results
-plot(solids, vol_def, col="green", pch=15,
-     xlab="Number of Faces", ylab="Deformity Value",
-     main="3D Deformity: Sphere to Platonic Solid",
-     ylim=range(c(edge_def, area_def, vol_def))) # Set y-axis to fit all points
-points(solids, area_def, col="red", pch=16)
-points(solids, edge_def, col="blue", pch=17)
-legend("topright", c("Volume", "Surface Area", "Edge Length"),
-       col=c("green","red","blue"), pch=c(15,16,17))
+plot(solids, norm_vol_def, type = "b", col="green", pch=15,
+     xlab="Number of Faces", ylab="Normalized Deformity",
+     main="Normalized 3D Deformity: Sphere to Platonic Solid",
+     ylim=range(c(norm_vol_def, norm_area_def_3d, norm_edge_def))) # Set y-axis to fit all points
+points(solids, norm_area_def_3d, type = "b", col="red", pch=16)
+points(solids, norm_edge_def, type = "b", col="blue", pch=17)
+legend("topright", c("Relative Volume", "Relative Surface Area", "Relative Edge Length"),
+       col=c("green","red","blue"), lty=1, pch=c(15,16,17))
 ```
 
 <div class="figure">
 
-<img src="man/figures/README-example-3d-plot-1.png" alt="Comparison of deformity types for the five Platonic solids." width="100%" />
+<img src="man/figures/README-example-3d-plot-1.png" alt="Comparison of normalized deformity types for the five Platonic solids." width="100%" />
 <p class="caption">
-Comparison of deformity types for the five Platonic solids.
+Comparison of normalized deformity types for the five Platonic solids.
 </p>
 
 </div>
