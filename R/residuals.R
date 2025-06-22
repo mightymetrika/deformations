@@ -262,6 +262,43 @@ plot_residual_shapes <- function(x, ...) {
   }
 }
 
+#' Draw Polygon with Standardized Orientation
+#' @keywords internal
+draw_polygon_standard <- function(cx, cy, side_length, n, col = "black", lwd = 1) {
+
+  # Use the existing draw_square function for squares to ensure axis alignment
+  if (n == 4) {
+    draw_square(cx, cy, side_length, col = col, lwd = lwd)
+    return()
+  }
+
+  # Calculate radius of circumscribed circle
+  radius <- side_length / (2 * sin(pi/n))
+
+  # Standardized orientations for better size comparison:
+  # For most polygons, orient to have a flat edge at the bottom when possible
+  # This makes size comparison much easier
+
+  if (n == 3) {
+    # Triangle: flat base at bottom
+    start_angle <- -pi/2 - pi/n  # This puts a flat edge at the bottom
+  } else if (n == 6) {
+    # Hexagon: flat edges at top and bottom (most natural)
+    start_angle <- -pi/2 - pi/n  # This puts a flat edge at the bottom
+  } else {
+    # For other polygons (pentagon, etc.): flat edge at bottom
+    start_angle <- -pi/2 - pi/n  # This puts a flat edge at the bottom
+  }
+
+  # Generate vertices
+  angles <- seq(start_angle, start_angle + 2*pi, length.out = n + 1)
+  x <- cx + radius * cos(angles)
+  y <- cy + radius * sin(angles)
+
+  # Draw polygon
+  graphics::lines(x, y, col = col, lwd = lwd)
+}
+
 #' Plot 2D Residual Shapes
 #' @keywords internal
 plot_2d_residual_shapes <- function(x, ...) {
@@ -279,8 +316,8 @@ plot_2d_residual_shapes <- function(x, ...) {
   # Calculate plot limits to fit all shapes
   max_radius <- max(r, side_1d * sqrt(n) / 2, side_2d * sqrt(n) / 2) * 1.3
 
-  # Set up plot with proper margins
-  graphics::par(mar = c(4, 4, 4, 6))  # Extra space on right for legend
+  # Set up plot with proper margins - extra space on top for text
+  graphics::par(mar = c(4, 4, 6, 6))  # Extra space on top and right
 
   plot(0, 0, type = "n",
        xlim = c(-max_radius, max_radius),
@@ -302,11 +339,11 @@ plot_2d_residual_shapes <- function(x, ...) {
   circle_y <- r * sin(theta)
   graphics::lines(circle_x, circle_y, col = "black", lwd = 2, lty = 2)
 
-  # Draw 1D residual polygon (red)
-  draw_regular_polygon(0, 0, side_1d, n, col = "red", lwd = 2)
+  # Draw 1D residual polygon (red) - use standardized orientations
+  draw_polygon_standard(0, 0, side_1d, n, col = "red", lwd = 2)
 
-  # Draw 2D residual polygon (blue)
-  draw_regular_polygon(0, 0, side_2d, n, col = "blue", lwd = 2)
+  # Draw 2D residual polygon (blue) - use standardized orientations
+  draw_polygon_standard(0, 0, side_2d, n, col = "blue", lwd = 2)
 
   # Position legend outside plot area
   graphics::par(xpd = TRUE)  # Allow drawing outside plot region
@@ -316,17 +353,28 @@ plot_2d_residual_shapes <- function(x, ...) {
                    lty = c(2, 1, 1),
                    lwd = 2,
                    xjust = 0, yjust = 1)
-  graphics::par(xpd = FALSE)
 
-  # Add clean size annotations at bottom
+  # Add size annotations in the upper-left area to avoid overlap
   info_text <- c(
     paste("Circle radius:", round(r, 4)),
     paste("1D side length:", round(side_1d, 4)),
     paste("2D side length:", round(side_2d, 4))
   )
 
-  graphics::mtext(info_text, side = 1, line = 1:3, adj = 0,
-                  col = c("black", "red", "blue"), cex = 0.8)
+  # Position text in upper-left corner with some spacing
+  text_x <- -max_radius * 0.95
+  text_y_start <- max_radius * 0.9
+  text_spacing <- max_radius * 0.15
+
+  for (i in seq_along(info_text)) {
+    graphics::text(text_x, text_y_start - (i-1) * text_spacing,
+                   info_text[i],
+                   col = c("black", "red", "blue")[i],
+                   cex = 0.9,
+                   adj = 0)  # Left-aligned
+  }
+
+  graphics::par(xpd = FALSE)
 }
 
 #' Draw Regular Polygon (Fixed Orientation)
